@@ -91,11 +91,10 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* --- ❗️ [수정됨] AI 추천 태그 스타일 --- */
         .ai-recommendation-tag {
-            display: inline-flex; /* flex로 변경하여 내부 아이템 정렬 */
-            align-items: center;    /* 수직 중앙 정렬 */
-            justify-content: center; /* 수평 중앙 정렬 */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background-color: #f3e8ff;
             color: #8b5cf6;
             padding: 4px 12px;
@@ -104,7 +103,6 @@
             font-weight: 500;
             margin: 4px;
         }
-        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -125,16 +123,14 @@
             width: 90%;
             max-width: 400px;
         }
-        
-        /* PDF Export Specific Styles */
         .pdf-mode {
-            width: 1123px; /* A4 landscape width for high DPI */
+            width: 1123px;
             padding: 20px;
             background-color: white;
         }
         .pdf-mode .pdf-grid {
             display: grid;
-            grid-template-columns: 42% 58%; /* Adjust column ratio */
+            grid-template-columns: 42% 58%;
             gap: 15px;
         }
         .pdf-mode .card { 
@@ -143,7 +139,7 @@
             border: 1px solid #e2e8f0; 
             margin-bottom: 10px; 
             border-radius: 8px;
-            height: auto; /* Override height: 100% */
+            height: auto;
         }
         .pdf-mode .card-title { font-size: 11px; margin-bottom: 6px; }
         .pdf-mode h2 { font-size: 14px; font-weight: bold; }
@@ -156,23 +152,20 @@
         .pdf-mode .py-1\.5 { padding-top: 2px; padding-bottom: 2px; }
         .pdf-mode .px-2 { padding-left: 4px; padding-right: 4px; }
         .pdf-mode .ai-recommendation-tag { font-size: 7px; padding: 2px 5px; }
-        .pdf-mode canvas, .pdf-mode #creditChartCanvas-img { max-height: 150px; } /* Increased graph height */
-
-        /* Table specific adjustments */
+        .pdf-mode canvas, .pdf-mode #creditChartCanvas-img { max-height: 150px; }
         .pdf-mode #individualStatusTable tr { border-bottom: none; }
         .pdf-mode td { 
             vertical-align: middle; 
-            white-space: normal; /* Allow wrapping */
+            white-space: normal;
             word-break: keep-all;
         }
-        /* Column width adjustments for the individual status table */
-        .pdf-mode #individualStatusTable th:nth-child(1), .pdf-mode #individualStatusTable td:nth-child(1) { width: 10%; } /* 구분 */
-        .pdf-mode #individualStatusTable th:nth-child(2), .pdf-mode #individualStatusTable td:nth-child(2) { width: 8%; } /* 학년 */
-        .pdf-mode #individualStatusTable th:nth-child(3), .pdf-mode #individualStatusTable td:nth-child(3) { width: 8%; } /* 학기 */
-        .pdf-mode #individualStatusTable th:nth-child(4) { width: 30%; } /* 과목명 Header */
-        .pdf-mode #individualStatusTable td:nth-child(4) { width: 30%; } /* 과목명 Cell */
-        .pdf-mode #individualStatusTable th:nth-child(5), .pdf-mode #individualStatusTable td:nth-child(5) { width: 20%; } /* 교과군 */
-        .pdf-mode #individualStatusTable th:nth-child(6), .pdf-mode #individualStatusTable td:nth-child(6) { width: 10%; } /* 학점 */
+        .pdf-mode #individualStatusTable th:nth-child(1), .pdf-mode #individualStatusTable td:nth-child(1) { width: 10%; }
+        .pdf-mode #individualStatusTable th:nth-child(2), .pdf-mode #individualStatusTable td:nth-child(2) { width: 8%; }
+        .pdf-mode #individualStatusTable th:nth-child(3), .pdf-mode #individualStatusTable td:nth-child(3) { width: 8%; }
+        .pdf-mode #individualStatusTable th:nth-child(4) { width: 30%; }
+        .pdf-mode #individualStatusTable td:nth-child(4) { width: 30%; }
+        .pdf-mode #individualStatusTable th:nth-child(5), .pdf-mode #individualStatusTable td:nth-child(5) { width: 20%; }
+        .pdf-mode #individualStatusTable th:nth-child(6), .pdf-mode #individualStatusTable td:nth-child(6) { width: 10%; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -222,7 +215,6 @@
         </div>
     </div>
 
-    <!-- PDF Export Modal -->
     <div id="pdfModal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 class="text-xl font-bold mb-4">학급별 PDF 출력</h3>
@@ -235,871 +227,18 @@
         </div>
     </div>
     
-    <!-- Hidden container for PDF rendering -->
     <div id="pdf-render-container" class="absolute -left-full bg-white"></div>
 
 
     <script>
-        // --- 데이터 영역 ---
-        const RAW_CMS_DATA = [
-            {"subjectName": "공통국어1", "slug": "gongtonggwamog", "grade": "1", "semester": "1"},
-            {"subjectName": "공통국어2", "slug": "gongtonggugeo2", "grade": "1", "semester": "2"},
-            {"subjectName": "공통수학1", "slug": "gongtongsuhag1", "grade": "1", "semester": "1"},
-            {"subjectName": "공통수학2", "slug": "gongtongsuhag2", "grade": "1", "semester": "2"},
-            {"subjectName": "공통영어1", "slug": "gongtongyeongeo1", "grade": "1", "semester": "1"},
-            {"subjectName": "공통영어2", "slug": "gongtongyeongeo2", "grade": "1", "semester": "2"},
-            {"subjectName": "통합사회1", "slug": "tonghabsahoe1", "grade": "1", "semester": "1"},
-            {"subjectName": "통합사회2", "slug": "tonghabsahoe2", "grade": "1", "semester": "2"},
-            {"subjectName": "통합과학1", "slug": "tonghabgwahag1", "grade": "1", "semester": "1"},
-            {"subjectName": "통합과학2", "slug": "tonghabgwahag2", "grade": "1", "semester": "2"},
-            {"subjectName": "한국사1", "slug": "hangugsa1", "grade": "1", "semester": "1"},
-            {"subjectName": "한국사2", "slug": "hangugsa2", "grade": "1", "semester": "2"},
-            {"subjectName": "과학탐구실험1", "slug": "gwahagtamgusilheom1", "grade": "1", "semester": "1"},
-            {"subjectName": "과학탐구실험2", "slug": "gwahagtamgusilheom2", "grade": "1", "semester": "2"},
-            {"subjectName": "체육1", "slug": "ceyug1", "grade": "1", "semester": "1"},
-            {"subjectName": "체육2", "slug": "ceyug2", "grade": "1", "semester": "2"},
-            {"subjectName": "음악", "slug": "eumag", "grade": "1", "semester": "1"},
-            {"subjectName": "미술", "slug": "misul", "grade": "1", "semester": "2"},
-            {"subjectName": "문학", "slug": "munhag-f72be", "grade": "2", "semester": "1"},
-            {"subjectName": "독서와 작문", "slug": "dokseowajakmun", "grade": "2", "semester": "2"},
-            {"subjectName": "대수", "slug": "daesoo", "grade": "2", "semester": "1"},
-            {"subjectName": "미적분I", "slug": "mijeogbuni", "grade": "2", "semester": "2"},
-            {"subjectName": "영어I", "slug": "yeongeoi", "grade": "2", "semester": "1"},
-            {"subjectName": "영어 독해와 작문", "slug": "yeongeodokhaewajakmun", "grade": "2", "semester": "2"},
-            {"subjectName": "스포츠 문화", "slug": "sportsmunhwa", "grade": "2", "semester": "1"},
-            {"subjectName": "스포츠 과학", "slug": "sportsgwahak", "grade": "2", "semester": "2"},
-            {"subjectName": "스포츠 생활1", "slug": "sportssaenghwal1", "grade": "3", "semester": "1"},
-            {"subjectName": "스포츠 생활2", "slug": "sportssaenghwal2", "grade": "3", "semester": "2"},
-            {"subjectName": "주제 탐구 독서", "slug": "jujetamgudokseo", "grade": "2", "semester": "1"},
-            {"subjectName": "인공지능 수학", "slug": "ingongjineungsuhak", "grade": "2", "semester": "1"},
-            {"subjectName": "세계 문화와 영어", "slug": "segyemunhwawayeongeo", "grade": "2", "semester": "1"},
-            {"subjectName": "물리학", "slug": "mulrihag", "grade": "2", "semester": "1"},
-            {"subjectName": "화학", "slug": "hwahag", "grade": "2", "semester": "1"},
-            {"subjectName": "생명과학", "slug": "saengmyeonggwahag", "grade": "2", "semester": "1"},
-            {"subjectName": "지구과학", "slug": "jigugwahag", "grade": "2", "semester": "1"},
-            {"subjectName": "세계사", "slug": "segyesa", "grade": "2", "semester": "1"},
-            {"subjectName": "세계시민과 지리", "slug": "segyesimingwajiri", "grade": "2", "semester": "1"},
-            {"subjectName": "법과 사회", "slug": "beopgwasahoe", "grade": "2", "semester": "1"},
-            {"subjectName": "인문학과 윤리", "slug": "inmunhakgwayunri", "grade": "2", "semester": "1"},
-            {"subjectName": "일본어", "slug": "ilboneo", "grade": "2", "semester": "1"},
-            {"subjectName": "중국어", "slug": "junggugeo", "grade": "2", "semester": "1"},
-            {"subjectName": "한문", "slug": "hanmun", "grade": "2", "semester": "1"},
-            {"subjectName": "미술창작", "slug": "misulchangjak", "grade": "2", "semester": "1"},
-            {"subjectName": "문학과 영상", "slug": "munhakgwayeongsang", "grade": "2", "semester": "2"},
-            {"subjectName": "언어생활 탐구", "slug": "eoneosaenghwaltamgu", "grade": "2", "semester": "2"},
-            {"subjectName": "기하", "slug": "giha", "grade": "2", "semester": "2"},
-            {"subjectName": "미디어 영어", "slug": "midieoyeongeo", "grade": "2", "semester": "2"},
-            {"subjectName": "사회와 문화", "slug": "sahoewamunhwa", "grade": "2", "semester": "2"},
-            {"subjectName": "현대사회와 윤리", "slug": "hyeondaesahoewayunri", "grade": "2", "semester": "2"},
-            {"subjectName": "도시의 미래 탐구", "slug": "hyeondaesadosiuimiraetamguhoewayunri", "grade": "2", "semester": "2"},
-            {"subjectName": "동아시아 역사 기행", "slug": "dongasiayeoksagihaeng", "grade": "2", "semester": "2"},
-            {"subjectName": "역학과 에너지", "slug": "yeoghaggwa-eneoji", "grade": "2", "semester": "2"},
-            {"subjectName": "물질과 에너지", "slug": "muljilgwa-eneoji", "grade": "2", "semester": "2"},
-            {"subjectName": "세포와 물질대사", "slug": "sepowa-muljildaesa", "grade": "2", "semester": "2"},
-            {"subjectName": "지구시스템과학", "slug": "jigusiseutemgwahag", "grade": "2", "semester": "2"},
-            {"subjectName": "음악 감상과 비평", "slug": "eumakgamsanggwabipyeong", "grade": "2", "semester": "2"},
-            {"subjectName": "정보", "slug": "jeongbo", "grade": "2", "semester": "2"},
-            {"subjectName": "인간과 심리", "slug": "ingangwa-simri", "grade": "2", "semester": "2"},
-            {"subjectName": "화법과 언어", "slug": "hwabeopgwaeoneo", "grade": "3", "semester": "1"},
-            {"subjectName": "독서 토론과 글쓰기", "slug": "dokseotorongwa-geulssgi", "grade": "3", "semester": "1"},
-            {"subjectName": "미적분II", "slug": "mijeogbunii", "grade": "3", "semester": "1"},
-            {"subjectName": "확률과 통계", "slug": "hwagryulgwa-tonggye", "grade": "3", "semester": "1"},
-            {"subjectName": "경제수학", "slug": "gyeongjesuhak", "grade": "3", "semester": "1"},
-            {"subjectName": "영어 발표와 토론", "slug": "yeongeobalpyowatoron", "grade": "3", "semester": "1"},
-            {"subjectName": "영어II", "slug": "yeongeoii", "grade": "3", "semester": "1"},
-            {"subjectName": "정치", "slug": "jeongchi", "grade": "3", "semester": "1"},
-            {"subjectName": "한국지리 탐구", "slug": "hangukjiritamgu", "grade": "3", "semester": "1"},
-            {"subjectName": "윤리와 사상", "slug": "yunriwasasang", "grade": "3", "semester": "1"},
-            {"subjectName": "역사로 탐구하는 현대 세계", "slug": "yeoksaro-tamguhaneun-hyeondaesegye", "grade": "3", "semester": "1"},
-            {"subjectName": "전자기와 양자", "slug": "jeonjagiwa-yangja", "grade": "3", "semester": "1"},
-            {"subjectName": "화학 반응의 세계", "slug": "hwahag-baneungyi-segye", "grade": "3", "semester": "1"},
-            {"subjectName": "생물의 유전", "slug": "saengmulyi-yujeon", "grade": "3", "semester": "1"},
-            {"subjectName": "행성우주과학", "slug": "haengseongujugwahag", "grade": "3", "semester": "1"},
-            {"subjectName": "미술과 매체", "slug": "misulgwa-maeche", "grade": "3", "semester": "1"},
-            {"subjectName": "데이터 과학", "slug": "deiteogwahak", "grade": "3", "semester": "1"},
-            {"subjectName": "교육의 이해", "slug": "gyoyuguiihae", "grade": "3", "semester": "1"},
-            {"subjectName": "보건", "slug": "bogeon", "grade": "3", "semester": "1"},
-            {"subjectName": "마케팅과 광고", "slug": "maketinggwagwanggo", "grade": "3", "semester": "1"},
-            {"subjectName": "매체 의사소통", "slug": "maecheuisasotong", "grade": "3", "semester": "2"},
-            {"subjectName": "수학과 문화", "slug": "suhakgwamunhwa", "grade": "3", "semester": "2"},
-            {"subjectName": "실생활 영어 회화", "slug": "silsaenghwal-yeongeo-hoehwa", "grade": "3", "semester": "2"},
-            {"subjectName": "사회문제 탐구", "slug": "sahoemunjetamgu", "grade": "3", "semester": "2"},
-            {"subjectName": "여행지리", "slug": "yeohaengjiri", "grade": "3", "semester": "2"},
-            {"subjectName": "윤리문제 탐구", "slug": "yunrimunjetamgu", "grade": "3", "semester": "2"},
-            {"subjectName": "음악과 미디어", "slug": "eumakgwa-midieo", "grade": "3", "semester": "2"},
-            {"subjectName": "생태와 환경", "slug": "saengtaewa-hwangyeong", "grade": "3", "semester": "2"},
-            {"subjectName": "인간과 철학", "slug": "ingangwa-cheolhak", "grade": "3", "semester": "2"},
-            {"subjectName": "인간과 경제활동", "slug": "ingangwa-gyeongjehwaldong", "grade": "3", "semester": "2"},
-            {"subjectName": "직무 의사소통", "slug": "jikmuisasotong", "grade": "3", "semester": "2"},
-            {"subjectName": "직무 영어", "slug": "jikmuyeongeo", "grade": "3", "semester": "2"},
-            {"subjectName": "직무 수학", "slug": "jikmusuhak", "grade": "3", "semester": "2"},
-            {"subjectName": "기후변화와 환경생태", "slug": "gihubyeonhwawa-hwangyeongsaengtae", "grade": "3", "semester": "2"},
-            {"subjectName": "과학의 역사와 문화", "slug": "gwahagui-yeoksawa-munhwa", "grade": "3", "semester": "2"},
-        ];
-
-        const courseDetails = {
-            'gongtonggwamog': { credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true },
-            'gongtonggugeo2': { credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true },
-            'gongtongsuhag1': { credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true },
-            'gongtongsuhag2': { credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true },
-            'gongtongyeongeo1': { credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true },
-            'gongtongyeongeo2': { credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true },
-            'tonghabsahoe1': { credits: 4, category: '탐구교과', subCategory: '사회', required: true, offered: true },
-            'tonghabsahoe2': { credits: 4, category: '탐구교과', subCategory: '사회', required: true, offered: true },
-            'tonghabgwahag1': { credits: 4, category: '탐구교과', subCategory: '과학', required: true, offered: true },
-            'tonghabgwahag2': { credits: 4, category: '탐구교과', subCategory: '과학', required: true, offered: true },
-            'hangugsa1': { credits: 3, category: '기초교과', subCategory: '한국사', required: true, offered: true },
-            'hangugsa2': { credits: 3, category: '기초교과', subCategory: '한국사', required: true, offered: true },
-            'gwahagtamgusilheom1': { credits: 1, category: '탐구교과', subCategory: '과학', required: true, offered: true },
-            'gwahagtamgusilheom2': { credits: 1, category: '탐구교과', subCategory: '과학', required: true, offered: true },
-            'ceyug1': { credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'ceyug2': { credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'eumag': { credits: 3, category: '예술교과', subCategory: '예술', required: true, offered: true },
-            'misul': { credits: 3, category: '예술교과', subCategory: '예술', required: true, offered: true },
-            'munhag-f72be': { credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true },
-            'dokseowajakmun': { credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true },
-            'daesoo': { credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true },
-            'mijeogbuni': { credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true },
-            'yeongeoi': { credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true },
-            'yeongeodokhaewajakmun': { credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true },
-            'sportsmunhwa': { credits: 1, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'sportsgwahak': { credits: 1, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'sportssaenghwal1': { credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'sportssaenghwal2': { credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true },
-            'jujetamgudokseo': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'ingongjineungsuhak': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'segyemunhwawayeongeo': { credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'mulrihag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-            'hwahag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-            'saengmyeonggwahag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-            'jigugwahag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-            'segyesa': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'segyesimingwajiri': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'beopgwasahoe': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'inmunhakgwayunri': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'ilboneo': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'junggugeo': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'hanmun': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'misulchangjak': { credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true },
-            'munhakgwayeongsang': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'eoneosaenghwaltamgu': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'giha': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'midieoyeongeo': { credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'sahoewamunhwa': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'hyeondaesahoewayunri': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'hyeondaesadosiuimiraetamguhoewayunri': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'dongasiayeoksagihaeng': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'yeoghaggwa-eneoji': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['mulrihag'] },
-            'muljilgwa-eneoji': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['hwahag'] },
-            'sepowa-muljildaesa': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['saengmyeonggwahag'] },
-            'jigusiseutemgwahag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['jigugwahag'] },
-            'eumakgamsanggwabipyeong': { credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true },
-            'jeongbo': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'ingangwa-simri': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'hwabeopgwaeoneo': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'dokseotorongwa-geulssgi': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'mijeogbunii': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true, prerequisites: ['mijeogbuni'] },
-            'hwagryulgwa-tonggye': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'gyeongjesuhak': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'yeongeobalpyowatoron': { credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'yeongeoii': { credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'jeongchi': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'hangukjiritamgu': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'yunriwasasang': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'yeoksaro-tamguhaneun-hyeondaesegye': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'jeonjagiwa-yangja': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['mulrihag'] },
-            'hwahag-baneungyi-segye': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['hwahag'] },
-            'saengmulyi-yujeon': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['saengmyeonggwahag'] },
-            'haengseongujugwahag': { credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['jigugwahag'] },
-            'misulgwa-maeche': { credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true },
-            'deiteogwahak': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'gyoyuguiihae': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'bogeon': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'maketinggwagwanggo': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'maecheuisasotong': { credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'suhakgwamunhwa': { credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'silsaenghwal-yeongeo-hoehwa': { credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'sahoemunjetamgu': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'yeohaengjiri': { credits: 4, 'category': '탐구교과', subCategory: '사회', required: false, offered: true },
-            'yunrimunjetamgu': { credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true },
-            'eumakgwa-midieo': { credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true },
-            'saengtaewa-hwangyeong': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'ingangwa-cheolhak': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'ingangwa-gyeongjehwaldong': { credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true },
-            'jikmuisasotong': { credits: 3, category: '기초교과', subCategory: '국어', required: false, offered: true },
-            'jikmuyeongeo': { credits: 3, category: '기초교과', subCategory: '영어', required: false, offered: true },
-            'jikmusuhak': { credits: 3, category: '기초교과', subCategory: '수학', required: false, offered: true },
-            'gihubyeonhwawa-hwangyeongsaengtae': { credits: 3, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-            'gwahagui-yeoksawa-munhwa': { credits: 3, category: '탐구교과', subCategory: '과학', required: false, offered: true },
-        };
-
-        const requiredCreditsByGroup = {
-            '국어': 8, '수학': 8, '영어': 8, '한국사': 6, '사회': 8,
-            '과학': 10, '체육': 10, '예술': 10, 
-            '제2외국어/정보/교양': 16
-        };
-
-        const careerRecommendationsData = {
-            'AI학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            'IT융합공학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            'IT응용공학과': {
-                recommended: ['물리학', '미적분II', '확률과 통계'],
-                required: []
-            },
-            '간호학과': {
-                recommended: ['화학', '화학 반응의 세계', '생명과학', '생물의 유전', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '확률과 통계', '미적분II']
-            },
-            '건설환경공학부': {
-                recommended: ['물리학', '확률과 통계', '기하'],
-                required: ['기하', '미적분II']
-            },
-            '건축공학과': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['물리학', '미적분II']
-            },
-            '건축학과': {
-                recommended: ['물리학', '기하', '확률과 통계', '미적분II'],
-                required: ['미적분II']
-            },
-            '건축학부': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '경제학부': {
-                recommended: ['경제수학', '미적분II', '확률과 통계'],
-                required: []
-            },
-            '고분자공학과': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '기하'],
-                required: ['물리학', '화학', '미적분II']
-            },
-            '공과대학': {
-                recommended: ['전자기와 양자', '물리학', '화학', '화학 반응의 세계', '생명과학', '생물의 유전'],
-                required: []
-            },
-            '관광컨벤션학과': {
-                recommended: ['영어 독해와 작문', '실생활 영어 회화'],
-                required: []
-            },
-            '광메카트로닉스공학과': {
-                recommended: ['물리학', '생명과학', '화학'],
-                required: ['미적분II']
-            },
-            '국제학부': {
-                recommended: ['영어 독해와 작문', '실생활 영어 회화'],
-                required: []
-            },
-            '글로벌바이오메디컬공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '기계공학과': {
-                recommended: ['화학 반응의 세계', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '기계공학부': {
-                recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '미적분II', '기하']
-            },
-            '기계로봇에너지공학과': {
-                recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '미적분II', '기하']
-            },
-            '나노공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '나노메카트로닉스공학과': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '기하'],
-                required: ['물리학', '화학', '미적분II']
-            },
-            '나노에너지공학과': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '기하'],
-                required: ['물리학', '화학', '미적분II']
-            },
-            '농경제사회학부': {
-                recommended: ['미적분II', '확률과 통계'],
-                required: []
-            },
-            '대기과학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']
-            },
-            '대기환경과학과': {
-                recommended: ['지구과학', '물리학', '미적분II'],
-                required: []
-            },
-            '데이터과학과': {
-                recommended: ['기하'],
-                required: []
-            },
-            '도시공학과': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '동물생명자원과학과': {
-                recommended: ['생명과학', '화학'],
-                required: []
-            },
-            '디스플레이융합공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '디자인학과(디자인앤테크놀리지전공)': {
-                recommended: ['물리학', '미적분II', '확률과 통계'],
-                required: []
-            },
-            '물리ㆍ천문학부(물리학전공)': {
-                recommended: ['확률과 통계'],
-                required: ['전자기와 양자', '기하', '미적분II']
-            },
-            '물리ㆍ천문학부(천문학전공)': {
-                recommended: ['행성우주과학', '전자기와 양자', '확률과 통계'],
-                required: ['지구과학', '기하', '미적분II']
-            },
-            '물리교육과': {
-                recommended: ['전자기와 양자', '화학', '확률과 통계', '기하', '미적분II'],
-                required: ['물리학', '전자기와 양자', '기하', '미적분II']
-            },
-            '물리학과': {
-                recommended: ['화학', '물리학', '전자기와 양자', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '기하', '미적분II']
-            },
-            '미생물학과': {
-                recommended: ['화학'],
-                required: ['생명과학']
-            },
-            '바이오메카트로닉스학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '바이오산업기계공학과': {
-                recommended: ['전자기와 양자'],
-                required: ['물리학', '미적분II']
-            },
-            '바이오소재과학과': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'],
-                required: []
-            },
-            '바이오시스템ㆍ소재학부': {
-                recommended: ['전자기와 양자', '화학 반응의 세계'],
-                required: ['기하', '미적분II']
-            },
-            '바이오시스템의과학부': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'],
-                required: []
-            },
-            '바이오의공학부': {
-                recommended: ['생명과학', '생물의 유전', '물리학', '전자기와 양자'],
-                required: []
-            },
-            '바이오환경에너지학과': {
-                recommended: ['생명과학', '화학'],
-                required: []
-            },
-            '반도체공학과': {
-                recommended: ['물리학', '전자기와 양자'],
-                required: []
-            },
-            '반도체시스템공학과': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '보건환경융합과학부': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'],
-                required: []
-            },
-            '분자생물학과': {
-                recommended: ['생물의 유전', '화학'],
-                required: ['생명과학']
-            },
-            '불어불문학과': {
-                recommended: ['일본어'],
-                required: []
-            },
-            '사이버국방학과': {
-                recommended: ['기하'],
-                required: []
-            },
-            '사회기반시스템공학과': {
-                recommended: ['물리학', '화학', '기하', '확률과 통계'],
-                required: ['물리학', '미적분II']
-            },
-            '사회기반시스템공학부 건설환경플랜트공학': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '사회기반시스템공학부 도시시스템공학': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '사회환경시스템공학부': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '산업경영공학과': {
-                recommended: [],
-                required: ['미적분II', '확률과 통계']
-            },
-            '산업공학과': {
-                recommended: ['확률과 통계'],
-                required: ['미적분II', '확률과 통계']
-            },
-            '산업보안학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생물의 유전', '화학', '생명과학']
-            },
-            '생명과학과': {
-                recommended: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '생명과학부': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '기하', '확률과 통계'],
-                required: ['생물의 유전', '미적분II']
-            },
-            '생명자원공학부 동물생명공학': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '생명자원공학부 식물생명공학': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '생명환경화학과': {
-                recommended: ['생물의 유전', '화학 반응의 세계'],
-                required: ['생명과학', '화학']
-            },
-            '생물교육과': {
-                recommended: ['생물의 유전', '화학', '화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전']
-            },
-            '생물학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '생체의공학과': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '생화학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '소프트웨어융합학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '소프트웨어학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '소프트웨어학부': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '수리과학부': {
-                recommended: [],
-                required: ['기하', '미적분II', '확률과 통계']
-            },
-            '수의예과': {
-                recommended: ['미적분II', '확률과 통계'],
-                required: ['생물의 유전']
-            },
-            '수학과': {
-                recommended: ['확률과 통계', '기하'],
-                required: ['기하', '미적분II']
-            },
-            '수학교육과': {
-                recommended: ['기하', '확률과 통계'],
-                required: ['기하', '미적분II', '확률과 통계']
-            },
-            '스마트모빌리티학부': {
-                recommended: ['화학', '화학 반응의 세계', '물리학', '전자기와 양자'],
-                required: []
-            },
-            '스마트보안학부': {
-                recommended: ['기하'],
-                required: []
-            },
-            '스마트팜과학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생물의 유전', '화학', '생명과학']
-            },
-            '시스템경영공학과': {
-                recommended: [],
-                required: ['미적분II', '확률과 통계']
-            },
-            '시스템반도체공학과': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '시스템생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '시스템생물학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '식물생명과학과': {
-                recommended: ['화학'],
-                required: ['생명과학']
-            },
-            '식물생산과학부': {
-                recommended: ['화학 반응의 세계', '기하', '미적분II', '확률과 통계'],
-                required: ['생물의 유전']
-            },
-            '식물환경신소재공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '식품ㆍ동물생명공학부': {
-                recommended: [],
-                required: ['생물의 유전', '화학 반응의 세계']
-            },
-            '식품공학과': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'],
-                required: ['생명과학', '화학']
-            },
-            '식품생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '식품영양학과': {
-                recommended: ['화학 반응의 세계', '생물의 유전', '화학', '생명과학', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '식품자원경제학과': {
-                recommended: ['경제수학', '미적분II', '확률과 통계'],
-                required: []
-            },
-            '신소재공학부': {
-                recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '약과학과': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '약학과': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '약학부': {
-                recommended: ['생물의 유전', '화학 반응의 세계', '물리학', '기하', '확률과 통계'],
-                required: ['생명과학', '화학', '생물의 유전', '화학 반응의 세계', '미적분II']
-            },
-            '에너지시스템공학부': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '에너지자원공학과': {
-                recommended: ['확률과 통계'],
-                required: ['전자기와 양자', '기하', '미적분II']
-            },
-            '역사교육과': {
-                recommended: ['한문'],
-                required: []
-            },
-            '예술공학부': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '우주과학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']
-            },
-            '원예생명과학과': {
-                recommended: ['생명과학', '화학'],
-                required: []
-            },
-            '원자력공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '원자핵공학과': {
-                recommended: [],
-                required: ['전자기와 양자', '미적분II']
-            },
-            '유기소재시스템공학과': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '기하'],
-                required: ['물리학', '화학', '미적분II']
-            },
-            '유전생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '융합공학부': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '융합생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '융합에너지공학과': {
-                recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계'],
-                required: []
-            },
-            '응용물리학과': {
-                recommended: ['화학', '물리학', '전자기와 양자', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '기하', '미적분II']
-            },
-            '응용생물화학부': {
-                recommended: ['기하', '미적분II', '확률과 통계'],
-                required: ['생물의 유전', '화학 반응의 세계']
-            },
-            '응용수학과': {
-                recommended: ['확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '응용통계학과': {
-                recommended: ['확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '응용화학과': {
-                recommended: ['물리학', '전자기와 양자', '생명과학', '기하'],
-                required: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계']
-            },
-            '의류학과': {
-                recommended: ['화학', '생명과학'],
-                required: []
-            },
-            '의생명융합공학부': {
-                recommended: ['물리학', '화학'],
-                required: ['생명과학', '미적분II']
-            },
-            '의예과': {
-                recommended: ['물리학', '화학 반응의 세계', '생물의 유전', '확률과 통계', '미적분II', '기하'],
-                required: ['생명과학', '생물의 유전', '화학', '미적분II']
-            },
-            '의학부': {
-                recommended: ['물리학', '화학 반응의 세계', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '미적분II']
-            },
-            '인공지능학과': {
-                recommended: ['인공지능 수학', '확률과 통계', '기하'],
-                required: ['기하', '미적분II']
-            },
-            '일어일문학과': {
-                recommended: ['일본어'],
-                required: []
-            },
-            '자유전공학부': {
-                recommended: ['미적분II', '확률과 통계'],
-                required: []
-            },
-            '재료공학부': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '확률과 통계'],
-                required: ['물리학', '화학', '미적분II', '기하']
-            },
-            '전기ㆍ정보공학부': {
-                recommended: ['기하', '확률과 통계'],
-                required: ['전자기와 양자', '미적분II']
-            },
-            '전기전자공학부': {
-                recommended: ['물리학', '전자기와 양자', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '전기전자공학부(반도체공학전공)': {
-                recommended: ['화학', '기하'],
-                required: ['물리학', '미적분II']
-            },
-            '전기전자공학부(전기공학전공)': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '미적분II']
-            },
-            '전기전자공학부(전자공학전공)': {
-                recommended: ['화학', '기하'],
-                required: ['물리학', '미적분II']
-            },
-            '전자공학과': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '전자전기공학부': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '정보디스플레이학과': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']
-            },
-            '정보전자신소재공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '정보컴퓨터공학부(인공지능전공)': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '미적분II']
-            },
-            '정보컴퓨터공학부(컴퓨터공학전공)': {
-                recommended: ['확률과 통계'],
-                required: ['물리학', '미적분II']
-            },
-            '조경ㆍ지역시스템공학부': {
-                recommended: ['전자기와 양자', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '조경학과': {
-                recommended: ['생명과학', '생물의 유전'],
-                required: []
-            },
-            '조선해양공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '미적분II', '기하']
-            },
-            '지구과학교육과': {
-                recommended: ['물리학', '행성우주과학', '미적분II', '기하', '확률과 통계'],
-                required: ['지구과학', '행성우주과학']
-            },
-            '지구시스템과학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']
-            },
-            '지구환경과학과': {
-                recommended: ['지구과학', '행성우주과학'],
-                required: []
-            },
-            '지구환경과학부': {
-                recommended: ['기하', '확률과 통계'],
-                required: ['지구과학', '전자기와 양자', '행성우주과학', '화학 반응의 세계', '미적분II']
-            },
-            '지리학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']
-            },
-            '지질환경과학과': {
-                recommended: ['지구과학', '행성우주과학', '미적분II'],
-                required: []
-            },
-            '차세대통신학과': {
-                recommended: ['물리학', '전자기와 양자'],
-                required: []
-            },
-            '천문우주학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']
-            },
-            '첨단소재공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '첨단융합학부': {
-                recommended: ['물리학', '화학', '생명과학', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '치의예과': {
-                recommended: ['물리학', '화학 반응의 세계', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '미적분II']
-            },
-            '컴퓨터공학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '컴퓨터공학부': {
-                recommended: [],
-                required: ['미적분II', '확률과 통계']
-            },
-            '컴퓨터과학과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '컴퓨터교육과': {
-                recommended: ['인공지능 수학', '확률과 통계'],
-                required: ['기하', '미적분II']
-            },
-            '컴퓨터학과': {
-                recommended: ['기하'],
-                required: []
-            },
-            '통계학과': {
-                recommended: ['기하', '확률과 통계'],
-                required: ['미적분II', '확률과 통계', '기하']
-            },
-            '한문학과': {
-                recommended: ['한문'],
-                required: []
-            },
-            '한방생명공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-            '한약학과': {
-                recommended: ['물리학', '기하', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '한의예과': {
-                recommended: ['물리학', '화학 반응의 세계', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학', '미적분II']
-            },
-            '항공우주공학과': {
-                recommended: ['전자기와 양자', '화학', '행성우주과학', '기하', '확률과 통계'],
-                required: ['물리학', '전자기와 양자', '미적분II', '기하']
-            },
-            '해양학과': {
-                recommended: ['지구과학', '행성우주과학', '미적분II'],
-                required: []
-            },
-            '화공생명공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '화학공학/고분자공학부': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '화학공학과': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '화학과': {
-                recommended: ['생명과학', '물리학', '전자기와 양자', '기하', '미적분II'],
-                required: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계']
-            },
-            '화학교육과': {
-                recommended: ['전자기와 양자', '화학 반응의 세계', '미적분II', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계']
-            },
-            '화학부': {
-                recommended: ['기하', '확률과 통계'],
-                required: ['화학', '화학 반응의 세계', '미적분II']
-            },
-            '화학생물공학부': {
-                recommended: ['물리학', '화학', '확률과 통계'],
-                required: ['미적분II']
-            },
-            '화학신소재공학부': {
-                recommended: ['전자기와 양자', '기하', '확률과 통계'],
-                required: ['물리학', '화학', '화학 반응의 세계', '미적분II']
-            },
-            '환경생태공학부': {
-                recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'],
-                required: []
-            },
-            '환경학및환경공학과': {
-                recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'],
-                required: ['생명과학', '생물의 유전', '화학']
-            },
-        };
+        const RAW_CMS_DATA = [{"subjectName": "공통국어1", "slug": "gongtonggwamog", "grade": "1", "semester": "1"}, {"subjectName": "공통국어2", "slug": "gongtonggugeo2", "grade": "1", "semester": "2"}, {"subjectName": "공통수학1", "slug": "gongtongsuhag1", "grade": "1", "semester": "1"}, {"subjectName": "공통수학2", "slug": "gongtongsuhag2", "grade": "1", "semester": "2"}, {"subjectName": "공통영어1", "slug": "gongtongyeongeo1", "grade": "1", "semester": "1"}, {"subjectName": "공통영어2", "slug": "gongtongyeongeo2", "grade": "1", "semester": "2"}, {"subjectName": "통합사회1", "slug": "tonghabsahoe1", "grade": "1", "semester": "1"}, {"subjectName": "통합사회2", "slug": "tonghabsahoe2", "grade": "1", "semester": "2"}, {"subjectName": "통합과학1", "slug": "tonghabgwahag1", "grade": "1", "semester": "1"}, {"subjectName": "통합과학2", "slug": "tonghabgwahag2", "grade": "1", "semester": "2"}, {"subjectName": "한국사1", "slug": "hangugsa1", "grade": "1", "semester": "1"}, {"subjectName": "한국사2", "slug": "hangugsa2", "grade": "1", "semester": "2"}, {"subjectName": "과학탐구실험1", "slug": "gwahagtamgusilheom1", "grade": "1", "semester": "1"}, {"subjectName": "과학탐구실험2", "slug": "gwahagtamgusilheom2", "grade": "1", "semester": "2"}, {"subjectName": "체육1", "slug": "ceyug1", "grade": "1", "semester": "1"}, {"subjectName": "체육2", "slug": "ceyug2", "grade": "1", "semester": "2"}, {"subjectName": "음악", "slug": "eumag", "grade": "1", "semester": "1"}, {"subjectName": "미술", "slug": "misul", "grade": "1", "semester": "2"}, {"subjectName": "문학", "slug": "munhag-f72be", "grade": "2", "semester": "1"}, {"subjectName": "독서와 작문", "slug": "dokseowajakmun", "grade": "2", "semester": "2"}, {"subjectName": "대수", "slug": "daesoo", "grade": "2", "semester": "1"}, {"subjectName": "미적분I", "slug": "mijeogbuni", "grade": "2", "semester": "2"}, {"subjectName": "영어I", "slug": "yeongeoi", "grade": "2", "semester": "1"}, {"subjectName": "영어 독해와 작문", "slug": "yeongeodokhaewajakmun", "grade": "2", "semester": "2"}, {"subjectName": "스포츠 문화", "slug": "sportsmunhwa", "grade": "2", "semester": "1"}, {"subjectName": "스포츠 과학", "slug": "sportsgwahak", "grade": "2", "semester": "2"}, {"subjectName": "스포츠 생활1", "slug": "sportssaenghwal1", "grade": "3", "semester": "1"}, {"subjectName": "스포츠 생활2", "slug": "sportssaenghwal2", "grade": "3", "semester": "2"}, {"subjectName": "주제 탐구 독서", "slug": "jujetamgudokseo", "grade": "2", "semester": "1"}, {"subjectName": "인공지능 수학", "slug": "ingongjineungsuhak", "grade": "2", "semester": "1"}, {"subjectName": "세계 문화와 영어", "slug": "segyemunhwawayeongeo", "grade": "2", "semester": "1"}, {"subjectName": "물리학", "slug": "mulrihag", "grade": "2", "semester": "1"}, {"subjectName": "화학", "slug": "hwahag", "grade": "2", "semester": "1"}, {"subjectName": "생명과학", "slug": "saengmyeonggwahag", "grade": "2", "semester": "1"}, {"subjectName": "지구과학", "slug": "jigugwahag", "grade": "2", "semester": "1"}, {"subjectName": "세계사", "slug": "segyesa", "grade": "2", "semester": "1"}, {"subjectName": "세계시민과 지리", "slug": "segyesimingwajiri", "grade": "2", "semester": "1"}, {"subjectName": "법과 사회", "slug": "beopgwasahoe", "grade": "2", "semester": "1"}, {"subjectName": "인문학과 윤리", "slug": "inmunhakgwayunri", "grade": "2", "semester": "1"}, {"subjectName": "일본어", "slug": "ilboneo", "grade": "2", "semester": "1"}, {"subjectName": "중국어", "slug": "junggugeo", "grade": "2", "semester": "1"}, {"subjectName": "한문", "slug": "hanmun", "grade": "2", "semester": "1"}, {"subjectName": "미술창작", "slug": "misulchangjak", "grade": "2", "semester": "1"}, {"subjectName": "문학과 영상", "slug": "munhakgwayeongsang", "grade": "2", "semester": "2"}, {"subjectName": "언어생활 탐구", "slug": "eoneosaenghwaltamgu", "grade": "2", "semester": "2"}, {"subjectName": "기하", "slug": "giha", "grade": "2", "semester": "2"}, {"subjectName": "미디어 영어", "slug": "midieoyeongeo", "grade": "2", "semester": "2"}, {"subjectName": "사회와 문화", "slug": "sahoewamunhwa", "grade": "2", "semester": "2"}, {"subjectName": "현대사회와 윤리", "slug": "hyeondaesahoewayunri", "grade": "2", "semester": "2"}, {"subjectName": "도시의 미래 탐구", "slug": "hyeondaesadosiuimiraetamguhoewayunri", "grade": "2", "semester": "2"}, {"subjectName": "동아시아 역사 기행", "slug": "dongasiayeoksagihaeng", "grade": "2", "semester": "2"}, {"subjectName": "역학과 에너지", "slug": "yeoghaggwa-eneoji", "grade": "2", "semester": "2"}, {"subjectName": "물질과 에너지", "slug": "muljilgwa-eneoji", "grade": "2", "semester": "2"}, {"subjectName": "세포와 물질대사", "slug": "sepowa-muljildaesa", "grade": "2", "semester": "2"}, {"subjectName": "지구시스템과학", "slug": "jigusiseutemgwahag", "grade": "2", "semester": "2"}, {"subjectName": "음악 감상과 비평", "slug": "eumakgamsanggwabipyeong", "grade": "2", "semester": "2"}, {"subjectName": "정보", "slug": "jeongbo", "grade": "2", "semester": "2"}, {"subjectName": "인간과 심리", "slug": "ingangwa-simri", "grade": "2", "semester": "2"}, {"subjectName": "화법과 언어", "slug": "hwabeopgwaeoneo", "grade": "3", "semester": "1"}, {"subjectName": "독서 토론과 글쓰기", "slug": "dokseotorongwa-geulssgi", "grade": "3", "semester": "1"}, {"subjectName": "미적분II", "slug": "mijeogbunii", "grade": "3", "semester": "1"}, {"subjectName": "확률과 통계", "slug": "hwagryulgwa-tonggye", "grade": "3", "semester": "1"}, {"subjectName": "경제수학", "slug": "gyeongjesuhak", "grade": "3", "semester": "1"}, {"subjectName": "영어 발표와 토론", "slug": "yeongeobalpyowatoron", "grade": "3", "semester": "1"}, {"subjectName": "영어II", "slug": "yeongeoii", "grade": "3", "semester": "1"}, {"subjectName": "정치", "slug": "jeongchi", "grade": "3", "semester": "1"}, {"subjectName": "한국지리 탐구", "slug": "hangukjiritamgu", "grade": "3", "semester": "1"}, {"subjectName": "윤리와 사상", "slug": "yunriwasasang", "grade": "3", "semester": "1"}, {"subjectName": "역사로 탐구하는 현대 세계", "slug": "yeoksaro-tamguhaneun-hyeondaesegye", "grade": "3", "semester": "1"}, {"subjectName": "전자기와 양자", "slug": "jeonjagiwa-yangja", "grade": "3", "semester": "1"}, {"subjectName": "화학 반응의 세계", "slug": "hwahag-baneungyi-segye", "grade": "3", "semester": "1"}, {"subjectName": "생물의 유전", "slug": "saengmulyi-yujeon", "grade": "3", "semester": "1"}, {"subjectName": "행성우주과학", "slug": "haengseongujugwahag", "grade": "3", "semester": "1"}, {"subjectName": "미술과 매체", "slug": "misulgwa-maeche", "grade": "3", "semester": "1"}, {"subjectName": "데이터 과학", "slug": "deiteogwahak", "grade": "3", "semester": "1"}, {"subjectName": "교육의 이해", "slug": "gyoyuguiihae", "grade": "3", "semester": "1"}, {"subjectName": "보건", "slug": "bogeon", "grade": "3", "semester": "1"}, {"subjectName": "마케팅과 광고", "slug": "maketinggwagwanggo", "grade": "3", "semester": "1"}, {"subjectName": "매체 의사소통", "slug": "maecheuisasotong", "grade": "3", "semester": "2"}, {"subjectName": "수학과 문화", "slug": "suhakgwamunhwa", "grade": "3", "semester": "2"}, {"subjectName": "실생활 영어 회화", "slug": "silsaenghwal-yeongeo-hoehwa", "grade": "3", "semester": "2"}, {"subjectName": "사회문제 탐구", "slug": "sahoemunjetamgu", "grade": "3", "semester": "2"}, {"subjectName": "여행지리", "slug": "yeohaengjiri", "grade": "3", "semester": "2"}, {"subjectName": "윤리문제 탐구", "slug": "yunrimunjetamgu", "grade": "3", "semester": "2"}, {"subjectName": "음악과 미디어", "slug": "eumakgwa-midieo", "grade": "3", "semester": "2"}, {"subjectName": "생태와 환경", "slug": "saengtaewa-hwangyeong", "grade": "3", "semester": "2"}, {"subjectName": "인간과 철학", "slug": "ingangwa-cheolhak", "grade": "3", "semester": "2"}, {"subjectName": "인간과 경제활동", "slug": "ingangwa-gyeongjehwaldong", "grade": "3", "semester": "2"}, {"subjectName": "직무 의사소통", "slug": "jikmuisasotong", "grade": "3", "semester": "2"}, {"subjectName": "직무 영어", "slug": "jikmuyeongeo", "grade": "3", "semester": "2"}, {"subjectName": "직무 수학", "slug": "jikmusuhak", "grade": "3", "semester": "2"}, {"subjectName": "기후변화와 환경생태", "slug": "gihubyeonhwawa-hwangyeongsaengtae", "grade": "3", "semester": "2"}, {"subjectName": "과학의 역사와 문화", "slug": "gwahagui-yeoksawa-munhwa", "grade": "3", "semester": "2"}];
+        const courseDetails = {'gongtonggwamog': {credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true}, 'gongtonggugeo2': {credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true}, 'gongtongsuhag1': {credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true}, 'gongtongsuhag2': {credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true}, 'gongtongyeongeo1': {credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true}, 'gongtongyeongeo2': {credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true}, 'tonghabsahoe1': {credits: 4, category: '탐구교과', subCategory: '사회', required: true, offered: true}, 'tonghabsahoe2': {credits: 4, category: '탐구교과', subCategory: '사회', required: true, offered: true}, 'tonghabgwahag1': {credits: 4, category: '탐구교과', subCategory: '과학', required: true, offered: true}, 'tonghabgwahag2': {credits: 4, category: '탐구교과', subCategory: '과학', required: true, offered: true}, 'hangugsa1': {credits: 3, category: '기초교과', subCategory: '한국사', required: true, offered: true}, 'hangugsa2': {credits: 3, category: '기초교과', subCategory: '한국사', required: true, offered: true}, 'gwahagtamgusilheom1': {credits: 1, category: '탐구교과', subCategory: '과학', required: true, offered: true}, 'gwahagtamgusilheom2': {credits: 1, category: '탐구교과', subCategory: '과학', required: true, offered: true}, 'ceyug1': {credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'ceyug2': {credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'eumag': {credits: 3, category: '예술교과', subCategory: '예술', required: true, offered: true}, 'misul': {credits: 3, category: '예술교과', subCategory: '예술', required: true, offered: true}, 'munhag-f72be': {credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true}, 'dokseowajakmun': {credits: 4, category: '기초교과', subCategory: '국어', required: true, offered: true}, 'daesoo': {credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true}, 'mijeogbuni': {credits: 4, category: '기초교과', subCategory: '수학', required: true, offered: true}, 'yeongeoi': {credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true}, 'yeongeodokhaewajakmun': {credits: 4, category: '기초교과', subCategory: '영어', required: true, offered: true}, 'sportsmunhwa': {credits: 1, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'sportsgwahak': {credits: 1, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'sportssaenghwal1': {credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'sportssaenghwal2': {credits: 2, category: '체육교과', subCategory: '체육', required: true, offered: true}, 'jujetamgudokseo': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'ingongjineungsuhak': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'segyemunhwawayeongeo': {credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'mulrihag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true}, 'hwahag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true}, 'saengmyeonggwahag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true}, 'jigugwahag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true}, 'segyesa': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'segyesimingwajiri': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'beopgwasahoe': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'inmunhakgwayunri': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'ilboneo': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'junggugeo': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'hanmun': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'misulchangjak': {credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true}, 'munhakgwayeongsang': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'eoneosaenghwaltamgu': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'giha': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'midieoyeongeo': {credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'sahoewamunhwa': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'hyeondaesahoewayunri': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'hyeondaesadosiuimiraetamguhoewayunri': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'dongasiayeoksagihaeng': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'yeoghaggwa-eneoji': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['mulrihag']}, 'muljilgwa-eneoji': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['hwahag']}, 'sepowa-muljildaesa': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['saengmyeonggwahag']}, 'jigusiseutemgwahag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['jigugwahag']}, 'eumakgamsanggwabipyeong': {credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true}, 'jeongbo': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'ingangwa-simri': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'hwabeopgwaeoneo': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'dokseotorongwa-geulssgi': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'mijeogbunii': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true, prerequisites: ['mijeogbuni']}, 'hwagryulgwa-tonggye': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'gyeongjesuhak': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'yeongeobalpyowatoron': {credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'yeongeoii': {credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'jeongchi': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'hangukjiritamgu': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'yunriwasasang': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'yeoksaro-tamguhaneun-hyeondaesegye': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'jeonjagiwa-yangja': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['mulrihag']}, 'hwahag-baneungyi-segye': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['hwahag']}, 'saengmulyi-yujeon': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['saengmyeonggwahag']}, 'haengseongujugwahag': {credits: 4, category: '탐구교과', subCategory: '과학', required: false, offered: true, prerequisites: ['jigugwahag']}, 'misulgwa-maeche': {credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true}, 'deiteogwahak': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'gyoyuguiihae': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'bogeon': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'maketinggwagwanggo': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'maecheuisasotong': {credits: 4, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'suhakgwamunhwa': {credits: 4, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'silsaenghwal-yeongeo-hoehwa': {credits: 4, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'sahoemunjetamgu': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'yeohaengjiri': {credits: 4, 'category': '탐구교과', subCategory: '사회', required: false, offered: true}, 'yunrimunjetamgu': {credits: 4, category: '탐구교과', subCategory: '사회', required: false, offered: true}, 'eumakgwa-midieo': {credits: 4, category: '예술교과', subCategory: '예술', required: false, offered: true}, 'saengtaewa-hwangyeong': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'ingangwa-cheolhak': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'ingangwa-gyeongjehwaldong': {credits: 4, category: '생활교양교과', subCategory: '제2외국어/정보/교양', required: false, offered: true}, 'jikmuisasotong': {credits: 3, category: '기초교과', subCategory: '국어', required: false, offered: true}, 'jikmuyeongeo': {credits: 3, category: '기초교과', subCategory: '영어', required: false, offered: true}, 'jikmusuhak': {credits: 3, category: '기초교과', subCategory: '수학', required: false, offered: true}, 'gihubyeonhwawa-hwangyeongsaengtae': {credits: 3, category: '탐구교과', subCategory: '과학', required: false, offered: true}, 'gwahagui-yeoksawa-munhwa': {credits: 3, category: '탐구교과', subCategory: '과학', required: false, offered: true}};
+        const requiredCreditsByGroup = {'국어': 8, '수학': 8, '영어': 8, '한국사': 6, '사회': 8, '과학': 10, '체육': 10, '예술': 10, '제2외국어/정보/교양': 16};
+        const careerRecommendationsData = {'AI학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, 'IT융합공학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, 'IT응용공학과': {recommended: ['물리학', '미적분II', '확률과 통계'], required: []}, '간호학과': {recommended: ['화학', '화학 반응의 세계', '생명과학', '생물의 유전', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '확률과 통계', '미적분II']}, '건설환경공학부': {recommended: ['물리학', '확률과 통계', '기하'], required: ['기하', '미적분II']}, '건축공학과': {recommended: ['물리학', '기하', '확률과 통계'], required: ['물리학', '미적분II']}, '건축학과': {recommended: ['물리학', '기하', '확률과 통계', '미적분II'], required: ['미적분II']}, '건축학부': {recommended: ['물리학', '기하', '확률과 통계'], required: ['미적분II']}, '경제학부': {recommended: ['경제수학', '미적분II', '확률과 통계'], required: []}, '고분자공학과': {recommended: ['전자기와 양자', '화학 반응의 세계', '기하'], required: ['물리학', '화학', '미적분II']}, '공과대학': {recommended: ['전자기와 양자', '물리학', '화학', '화학 반응의 세계', '생명과학', '생물의 유전'], required: []}, '관광컨벤션학과': {recommended: ['영어 독해와 작문', '실생활 영어 회화'], required: []}, '광메카트로닉스공학과': {recommended: ['물리학', '생명과학', '화학'], required: ['미적분II']}, '국제학부': {recommended: ['영어 독해와 작문', '실생활 영어 회화'], required: []}, '글로벌바이오메디컬공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '기계공학과': {recommended: ['화학 반응의 세계', '확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '기계공학부': {recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '미적분II', '기하']}, '기계로봇에너지공학과': {recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '미적분II', '기하']}, '나노공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '나노메카트로닉스공학과': {recommended: ['전자기와 양자', '화학 반응의 세계', '기하'], required: ['물리학', '화학', '미적분II']}, '나노에너지공학과': {recommended: ['전자기와 양자', '화학 반응의 세계', '기하'], required: ['물리학', '화학', '미적분II']}, '농경제사회학부': {recommended: ['미적분II', '확률과 통계'], required: []}, '대기과학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']}, '대기환경과학과': {recommended: ['지구과학', '물리학', '미적분II'], required: []}, '데이터과학과': {recommended: ['기하'], required: []}, '도시공학과': {recommended: ['물리학', '기하', '확률과 통계'], required: ['미적분II']}, '동물생명자원과학과': {recommended: ['생명과학', '화학'], required: []}, '디스플레이융합공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '디자인학과(디자인앤테크놀리지전공)': {recommended: ['물리학', '미적분II', '확률과 통계'], required: []}, '물리ㆍ천문학부(물리학전공)': {recommended: ['확률과 통계'], required: ['전자기와 양자', '기하', '미적분II']}, '물리ㆍ천문학부(천문학전공)': {recommended: ['행성우주과학', '전자기와 양자', '확률과 통계'], required: ['지구과학', '기하', '미적분II']}, '물리교육과': {recommended: ['전자기와 양자', '화학', '확률과 통계', '기하', '미적분II'], required: ['물리학', '전자기와 양자', '기하', '미적분II']}, '물리학과': {recommended: ['화학', '물리학', '전자기와 양자', '확률과 통계'], required: ['물리학', '전자기와 양자', '기하', '미적분II']}, '미생물학과': {recommended: ['화학'], required: ['생명과학']}, '바이오메카트로닉스학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '바이오산업기계공학과': {recommended: ['전자기와 양자'], required: ['물리학', '미적분II']}, '바이오소재과학과': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'], required: []}, '바이오시스템ㆍ소재학부': {recommended: ['전자기와 양자', '화학 반응의 세계'], required: ['기하', '미적분II']}, '바이오시스템의과학부': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'], required: []}, '바이오의공학부': {recommended: ['생명과학', '생물의 유전', '물리학', '전자기와 양자'], required: []}, '바이오환경에너지학과': {recommended: ['생명과학', '화학'], required: []}, '반도체공학과': {recommended: ['물리학', '전자기와 양자'], required: []}, '반도체시스템공학과': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '보건환경융합과학부': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'], required: []}, '분자생물학과': {recommended: ['생물의 유전', '화학'], required: ['생명과학']}, '불어불문학과': {recommended: ['일본어'], required: []}, '사이버국방학과': {recommended: ['기하'], required: []}, '사회기반시스템공학과': {recommended: ['물리학', '화학', '기하', '확률과 통계'], required: ['물리학', '미적분II']}, '사회기반시스템공학부 건설환경플랜트공학': {recommended: ['물리학', '기하', '확률과 통계'], required: ['미적분II']}, '사회기반시스템공학부 도시시스템공학': {recommended: ['물리학', '기하', '확률과 통계'], required: ['미적분II']}, '사회환경시스템공학부': {recommended: ['물리학', '기하', '확률과 통계'], required: ['미적분II']}, '산업경영공학과': {recommended: [], required: ['미적분II', '확률과 통계']}, '산업공학과': {recommended: ['확률과 통계'], required: ['미적분II', '확률과 통계']}, '산업보안학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생물의 유전', '화학', '생명과학']}, '생명과학과': {recommended: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '생명과학부': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '기하', '확률과 통계'], required: ['생물의 유전', '미적분II']}, '생명자원공학부 동물생명공학': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '생명자원공학부 식물생명공학': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '생명환경화학과': {recommended: ['생물의 유전', '화학 반응의 세계'], required: ['생명과학', '화학']}, '생물교육과': {recommended: ['생물의 유전', '화학', '화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전']}, '생물학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '생체의공학과': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '생화학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '소프트웨어융합학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '소프트웨어학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '소프트웨어학부': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '수리과학부': {recommended: [], required: ['기하', '미적분II', '확률과 통계']}, '수의예과': {recommended: ['미적분II', '확률과 통계'], required: ['생물의 유전']}, '수학과': {recommended: ['확률과 통계', '기하'], required: ['기하', '미적분II']}, '수학교육과': {recommended: ['기하', '확률과 통계'], required: ['기하', '미적분II', '확률과 통계']}, '스마트모빌리티학부': {recommended: ['화학', '화학 반응의 세계', '물리학', '전자기와 양자'], required: []}, '스마트보안학부': {recommended: ['기하'], required: []}, '스마트팜과학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생물의 유전', '화학', '생명과학']}, '시스템경영공학과': {recommended: [], required: ['미적분II', '확률과 통계']}, '시스템반도체공학과': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '시스템생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '시스템생물학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '식물생명과학과': {recommended: ['화학'], required: ['생명과학']}, '식물생산과학부': {recommended: ['화학 반응의 세계', '기하', '미적분II', '확률과 통계'], required: ['생물의 유전']}, '식물환경신소재공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '식품ㆍ동물생명공학부': {recommended: [], required: ['생물의 유전', '화학 반응의 세계']}, '식품공학과': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'], required: ['생명과학', '화학']}, '식품생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '식품영양학과': {recommended: ['화학 반응의 세계', '생물의 유전', '화학', '생명과학', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '식품자원경제학과': {recommended: ['경제수학', '미적분II', '확률과 통계'], required: []}, '신소재공학부': {recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '약과학과': {recommended: ['물리학', '기하', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']}, '약학과': {recommended: ['물리학', '기하', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']}, '약학부': {recommended: ['생물의 유전', '화학 반응의 세계', '물리학', '기하', '확률과 통계'], required: ['생명과학', '화학', '생물의 유전', '화학 반응의 세계', '미적분II']}, '에너지시스템공학부': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '에너지자원공학과': {recommended: ['확률과 통계'], required: ['전자기와 양자', '기하', '미적분II']}, '역사교육과': {recommended: ['한문'], required: []}, '예술공학부': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '우주과학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']}, '원예생명과학과': {recommended: ['생명과학', '화학'], required: []}, '원자력공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '원자핵공학과': {recommended: [], required: ['전자기와 양자', '미적분II']}, '유기소재시스템공학과': {recommended: ['전자기와 양자', '화학 반응의 세계', '기하'], required: ['물리학', '화학', '미적분II']}, '유전생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '융합공학부': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '융합생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '융합에너지공학과': {recommended: ['물리학', '전자기와 양자', '화학', '화학 반응의 세계'], required: []}, '응용물리학과': {recommended: ['화학', '물리학', '전자기와 양자', '확률과 통계'], required: ['물리학', '전자기와 양자', '기하', '미적분II']}, '응용생물화학부': {recommended: ['기하', '미적분II', '확률과 통계'], required: ['생물의 유전', '화학 반응의 세계']}, '응용수학과': {recommended: ['확률과 통계'], required: ['기하', '미적분II']}, '응용통계학과': {recommended: ['확률과 통계'], required: ['기하', '미적분II']}, '응용화학과': {recommended: ['물리학', '전자기와 양자', '생명과학', '기하'], required: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계']}, '의류학과': {recommended: ['화학', '생명과학'], required: []}, '의생명융합공학부': {recommended: ['물리학', '화학'], required: ['생명과학', '미적분II']}, '의예과': {recommended: ['물리학', '화학 반응의 세계', '생물의 유전', '확률과 통계', '미적분II', '기하'], required: ['생명과학', '생물의 유전', '화학', '미적분II']}, '의학부': {recommended: ['물리학', '화학 반응의 세계', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '미적분II']}, '인공지능학과': {recommended: ['인공지능 수학', '확률과 통계', '기하'], required: ['기하', '미적분II']}, '일어일문학과': {recommended: ['일본어'], required: []}, '자유전공학부': {recommended: ['미적분II', '확률과 통계'], required: []}, '재료공학부': {recommended: ['전자기와 양자', '화학 반응의 세계', '확률과 통계'], required: ['물리학', '화학', '미적분II', '기하']}, '전기ㆍ정보공학부': {recommended: ['기하', '확률과 통계'], required: ['전자기와 양자', '미적분II']}, '전기전자공학부': {recommended: ['물리학', '전자기와 양자', '확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '전기전자공학부(반도체공학전공)': {recommended: ['화학', '기하'], required: ['물리학', '미적분II']}, '전기전자공학부(전기공학전공)': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '미적분II']}, '전기전자공학부(전자공학전공)': {recommended: ['화학', '기하'], required: ['물리학', '미적분II']}, '전자공학과': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '전자전기공학부': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '정보디스플레이학과': {recommended: ['확률과 통계'], required: ['물리학', '전자기와 양자', '화학', '기하', '미적분II']}, '정보전자신소재공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '정보컴퓨터공학부(인공지능전공)': {recommended: ['확률과 통계'], required: ['물리학', '미적분II']}, '정보컴퓨터공학부(컴퓨터공학전공)': {recommended: ['확률과 통계'], required: ['물리학', '미적분II']}, '조경ㆍ지역시스템공학부': {recommended: ['전자기와 양자', '확률과 통계'], required: ['기하', '미적분II']}, '조경학과': {recommended: ['생명과학', '생물의 유전'], required: []}, '조선해양공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '미적분II', '기하']}, '지구과학교육과': {recommended: ['물리학', '행성우주과학', '미적분II', '기하', '확률과 통계'], required: ['지구과학', '행성우주과학']}, '지구시스템과학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']}, '지구환경과학과': {recommended: ['지구과학', '행성우주과학'], required: []}, '지구환경과학부': {recommended: ['기하', '확률과 통계'], required: ['지구과학', '전자기와 양자', '행성우주과학', '화학 반응의 세계', '미적분II']}, '지리학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']}, '지질환경과학과': {recommended: ['지구과학', '행성우주과학', '미적분II'], required: []}, '차세대통신학과': {recommended: ['물리학', '전자기와 양자'], required: []}, '천문우주학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '지구과학', '행성우주과학', '화학', '미적분II']}, '첨단소재공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '첨단융합학부': {recommended: ['물리학', '화학', '생명과학', '확률과 통계'], required: ['미적분II']}, '치의예과': {recommended: ['물리학', '화학 반응의 세계', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '미적분II']}, '컴퓨터공학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '컴퓨터공학부': {recommended: [], required: ['미적분II', '확률과 통계']}, '컴퓨터과학과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '컴퓨터교육과': {recommended: ['인공지능 수학', '확률과 통계'], required: ['기하', '미적분II']}, '컴퓨터학과': {recommended: ['기하'], required: []}, '통계학과': {recommended: ['기하', '확률과 통계'], required: ['미적분II', '확률과 통계', '기하']}, '한문학과': {recommended: ['한문'], required: []}, '한방생명공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}, '한약학과': {recommended: ['물리학', '기하', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계', '미적분II']}, '한의예과': {recommended: ['물리학', '화학 반응의 세계', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학', '미적분II']}, '항공우주공학과': {recommended: ['전자기와 양자', '화학', '행성우주과학', '기하', '확률과 통계'], required: ['물리학', '전자기와 양자', '미적분II', '기하']}, '해양학과': {recommended: ['지구과학', '행성우주과학', '미적분II'], required: []}, '화공생명공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '화학공학/고분자공학부': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '화학공학과': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '화학과': {recommended: ['생명과학', '물리학', '전자기와 양자', '기하', '미적분II'], required: ['화학', '화학 반응의 세계', '미적분II', '확률과 통계']}, '화학교육과': {recommended: ['전자기와 양자', '화학 반응의 세계', '미적분II', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계']}, '화학부': {recommended: ['기하', '확률과 통계'], required: ['화학', '화학 반응의 세계', '미적분II']}, '화학생물공학부': {recommended: ['물리학', '화학', '확률과 통계'], required: ['미적분II']}, '화학신소재공학부': {recommended: ['전자기와 양자', '기하', '확률과 통계'], required: ['물리학', '화학', '화학 반응의 세계', '미적분II']}, '환경생태공학부': {recommended: ['생명과학', '생물의 유전', '화학', '화학 반응의 세계'], required: []}, '환경학및환경공학과': {recommended: ['화학 반응의 세계', '미적분II', '확률과 통계'], required: ['생명과학', '생물의 유전', '화학']}};
         
-        // --- 전역 변수 및 초기화 ---
         let creditChart = null;
         let allStudentData = [];
         const subjectNameToSlugMap = new Map(RAW_CMS_DATA.map(item => [item.subjectName.replace(/\s/g, ''), item.slug]));
-
-        // --- UI 요소 ---
         const fileUploadInput = document.getElementById('fileUpload');
         const resetBtn = document.getElementById('resetBtn');
         const fileNameDisplay = document.getElementById('fileName');
@@ -1118,7 +257,6 @@
         const cancelPdfBtn = document.getElementById('cancelPdfBtn');
         const pdfRenderContainer = document.getElementById('pdf-render-container');
 
-        // --- 이벤트 리스너 ---
         document.addEventListener('DOMContentLoaded', initializeApp);
         fileUploadInput.addEventListener('change', handleFileUpload);
         resetBtn.addEventListener('click', handleReset);
@@ -1131,7 +269,6 @@
              window.open(GOOGLE_SHEET_EDIT_URL, '_blank');
         });
 
-        // --- 핵심 로직 ---
         function initializeApp() {
             const savedData = localStorage.getItem('studentData');
             const savedFileName = localStorage.getItem('studentDataFileName');
@@ -1277,8 +414,6 @@
 
             return { ...rawInfo, ...detailInfo, isChoice: !detailInfo.required };
         }
-
-        // --- 렌더링 함수 ---
         
         async function generateDashboardHTML(student) {
             const allCourses = getStudentCourses(student);
@@ -1419,13 +554,9 @@
             const overflow = basicCredits - maxBasicCredits;
             const selectedSlugs = new Set(courses.map(c => c.slug));
             const prerequisiteViolations = courses.filter(c => c.prerequisites && c.prerequisites.some(p => !selectedSlugs.has(p))).map(c => c.subjectName);
-
-            // 예술 교과 학점 계산
             const artCredits = courses.filter(c => c.subCategory === '예술').reduce((sum, c) => sum + c.credits, 0);
             const requiredArtCredits = requiredCreditsByGroup['예술'];
             const artDeficiency = Math.max(0, requiredArtCredits - artCredits);
-            
-            // 생활/교양 교과 학점 계산
             const lifeCredits = courses.filter(c => c.subCategory === '제2외국어/정보/교양').reduce((sum, c) => sum + c.credits, 0);
             const requiredLifeCredits = requiredCreditsByGroup['제2외국어/정보/교양'];
             const lifeDeficiency = Math.max(0, requiredLifeCredits - lifeCredits);
@@ -1546,16 +677,13 @@
                     <div id="aiResult">${resultHTML}${aiResponseHTML}</div>
                 </div>`;
         }
-
+        
+        // --- ❗️ [수정됨] Netlify 함수를 호출하도록 변경된 AI 추천 함수 ---
         async function getAiRecommendations(career, courses) {
-            // Gemini API를 사용하여 API 키 문제를 해결합니다.
-            // 플랫폼에서 API 키를 자동으로 제공하므로, 여기서는 빈 문자열로 둡니다.
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const apiUrl = '/.netlify/functions/openai-proxy';
 
             const studentCoursesText = courses.map(c => c.subjectName).join(', ');
-
-            // Gemini API의 구조에 맞게 프롬프트를 변환합니다.
+            
             const systemPrompt = "너는 고등학생의 진로진학 상담을 도와주는 AI 컨설턴트야. 학생의 정보를 바탕으로 유사 학과, 추천 과목, 탐구활동 주제를 HTML 형식으로 깔끔하게 추천해줘. 절대로 markdown 코드 블록(```)을 사용하지 마. 응답은 반드시 요청된 HTML 형식으로만 제공해야 해.";
             
             const userPrompt = `학생의 희망 진로는 '${career}'이고, 현재까지 선택한 주요 과목은 [${studentCoursesText}]이야. 이 정보를 바탕으로 다음 항목에 대해 추천해줘.
@@ -1604,18 +732,12 @@
 </div>`;
             
             const payload = {
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                contents: [{
-                    parts: [{ text: userPrompt }]
-                }],
-                safetySettings: [
-                    { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" },
-                ]
+                model: "gpt-4o",
+                messages: [
+                    { "role": "system", "content": systemPrompt },
+                    { "role": "user", "content": userPrompt }
+                ],
+                temperature: 0.7
             };
 
             try {
@@ -1625,33 +747,26 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    throw new Error(`API 요청 실패: ${response.statusText}. 응답: ${errorBody}`);
-                }
-
                 const result = await response.json();
-                const candidate = result.candidates?.[0];
+
+                if (!response.ok) {
+                    throw new Error(result.error?.message || '알 수 없는 API 오류가 발생했습니다.');
+                }
                 
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                     let content = candidate.content.parts[0].text;
+                if (result.choices && result.choices[0]) {
+                     let content = result.choices[0].message.content;
                      return content.replace(/```html|```/g, '').trim();
                 } else {
-                    if (candidate && candidate.finishReason === 'SAFETY') {
-                         console.error("AI 응답이 안전 설정에 의해 차단되었습니다.", candidate.safetyRatings);
-                         return `<p class="text-red-500">AI 응답이 안전상의 이유로 차단되었습니다. 프롬프트를 수정해 보세요.</p>`;
-                    }
-                    console.error("AI 응답에서 유효한 콘텐츠를 찾을 수 없습니다.", result);
-                    throw new Error("AI 응답 형식이 올바르지 않습니다.");
+                    console.error("OpenAI 응답에서 유효한 콘텐츠를 찾을 수 없습니다.", result);
+                    throw new Error("OpenAI 응답 형식이 올바르지 않습니다.");
                 }
 
             } catch (error) {
-                console.error("Gemini API 호출 오류:", error);
+                console.error("Netlify 함수 호출 오류:", error);
                 return `<p class="text-red-500">AI 추천을 불러오는 중 오류가 발생했습니다: ${error.message}</p>`;
             }
         }
         
-        // --- ❗️ [수정됨] PDF 내보내기 로직 ---
         async function handlePdfExport() {
             const classCode = classCodeInput.value.trim();
             if (!classCode) {
@@ -1697,19 +812,18 @@
                         const allCourses = getStudentCourses(student);
                         renderStatisticsChart(allCourses, true);
                         
-                        // --- ❗️ [수정됨] 차트를 이미지로 안정적으로 변환하는 로직 ---
                         const chartCanvas = pdfRenderContainer.querySelector('#creditChartCanvas');
                         if (chartCanvas && creditChart) {
                             const chartImageElement = new Image();
                             const imageLoadedPromise = new Promise(resolve => {
                                 chartImageElement.onload = resolve;
-                                chartImageElement.onerror = resolve; // 오류 발생 시에도 계속 진행
+                                chartImageElement.onerror = resolve;
                             });
                             
                             chartImageElement.src = creditChart.toBase64Image();
                             chartImageElement.id = 'creditChartCanvas-img';
                             
-                            await imageLoadedPromise; // 이미지가 완전히 로드될 때까지 기다립니다.
+                            await imageLoadedPromise;
 
                             chartImageElement.style.width = chartCanvas.clientWidth + 'px';
                             chartImageElement.style.height = chartCanvas.clientHeight + 'px';
@@ -1743,7 +857,6 @@
             }
         }
 
-        // --- 유틸리티 함수 ---
         function showError(message) {
             errorMessageSpan.textContent = message;
             errorDiv.classList.remove('hidden');
@@ -1755,3 +868,4 @@
     </script>
 </body>
 </html>
+
